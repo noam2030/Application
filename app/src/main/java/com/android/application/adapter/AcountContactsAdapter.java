@@ -53,6 +53,8 @@ public class AcountContactsAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.textView1 = (TextView) convertView.findViewById(R.id.textView1);
             viewHolder.textView2 = (TextView) convertView.findViewById(R.id.textView2);
+            viewHolder.textView3 = (TextView) convertView.findViewById(R.id.textView3);
+            viewHolder.textView4 = (TextView) convertView.findViewById(R.id.textView4);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -62,6 +64,8 @@ public class AcountContactsAdapter extends BaseAdapter {
         if (accountContact != null) {
             viewHolder.textView1.setText(accountContact.name);
             viewHolder.textView2.setText(accountContact.phoneNumber);
+            viewHolder.textView3.setText(accountContact.acountName);
+            viewHolder.textView4.setText(accountContact.acountType);
         }
 
         return convertView;
@@ -70,5 +74,7 @@ public class AcountContactsAdapter extends BaseAdapter {
     static class ViewHolder {
         TextView textView1;
         TextView textView2;
+        TextView textView3;
+        TextView textView4;
     }
 }

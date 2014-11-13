@@ -8,4 +8,6 @@ public class AccountContact {
     public int count;
     public String phoneNumber;
     public boolean isSelected;
+    public String acountName;
+    public String acountType;
 }

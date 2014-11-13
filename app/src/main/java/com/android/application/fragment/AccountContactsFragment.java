@@ -41,25 +41,62 @@ public class AccountContactsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         acountContactsAdapter = new AcountContactsAdapter(getActivity());
         listView.setAdapter(acountContactsAdapter);
-        accountContacts = getPhoneContact();
+        accountContacts = getContacts();
         acountContactsAdapter.setList(accountContacts);
     }
 
-    private ArrayList<AccountContact> getPhoneContact() {
+    private ArrayList<AccountContact> getContacts() {
         ArrayList<AccountContact> contacts = new ArrayList<AccountContact>();
-
-        Cursor phones = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-        while (phones.moveToNext()) {
-            String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-            String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            AccountContact accountContact = new AccountContact();
-            accountContact.name = name;
-            accountContact.phoneNumber = phoneNumber;
-            accountContact.isSelected = false;
-            contacts.add(accountContact);
+        Cursor contactCursor = null;
+        try {
+            contactCursor = getActivity().getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+            if (contactCursor.getCount() > 0) {
+                while (contactCursor.moveToNext()) {
+                    String contactId = contactCursor.getString(contactCursor.getColumnIndex(ContactsContract.Contacts._ID));
+                    Cursor phones = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
+                    if (phones.moveToFirst()) {
+                        String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        AccountContact accountContact = new AccountContact();
+                        accountContact.name = name;
+                        accountContact.phoneNumber = phoneNumber;
+                        accountContact.isSelected = false;
+                        getContactAccount(accountContact,contactId);
+                        contacts.add(accountContact);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            if (contactCursor != null) {
+                contactCursor.close();
+            }
         }
-        phones.close();
         return contacts;
+    }
+
+    public void getContactAccount(AccountContact accountContact, String id) {
+
+        Cursor cursor = null;
+        try {
+            cursor = getActivity().getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI,
+                    new String[]{ContactsContract.RawContacts.ACCOUNT_NAME, ContactsContract.RawContacts.ACCOUNT_TYPE},
+                    ContactsContract.RawContacts.CONTACT_ID + "=?",
+                    new String[]{String.valueOf(id)},
+                    null);
+
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                accountContact.acountName = (cursor.getString(cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)));
+                accountContact.acountType = (cursor.getString(cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)));
+                cursor.close();
+            }
+        } catch (Exception e) {
+
+        } finally {
+            cursor.close();
+        }
+
     }
 
 
